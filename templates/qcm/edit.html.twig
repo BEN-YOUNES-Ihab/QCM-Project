@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Changer QCM{% endblock %}
+
+{% block body %}
+    <h1>Changer QCM</h1>
+
+    {{ include('qcm/_form.html.twig', {'button_label': 'Sauvegarder'}) }}
+
+    <a href="{{ path('app_q_c_m_index') }}">Retour</a>
+
+    {{ include('qcm/_delete_form.html.twig') }}
+{% endblock %}

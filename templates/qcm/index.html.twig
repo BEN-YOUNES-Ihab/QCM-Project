@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}QCM{% endblock %}
+
+{% block body %}
+
+    <div class="topnav">
+        <a class="active" href="{{ path('app_q_c_m_index') }}">QCM</a>
+        <a href="{{ path('app_group_index') }}">Groupe</a>
+    </div> 
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Liste de QCM<th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for q_c_m in q_c_ms %}
+            <tr>
+                <td><a href="{{ path('question-qcm', {'id': q_c_m.id}) }}">{{ q_c_m.Title }}</a></td>
+                <td>
+                    <a href="{{ path('app_q_c_m_edit', {'id': q_c_m.id}) }}">Changer</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">vide</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    
+
+   <a class="nouveau" href="{{ path('app_q_c_m_new') }}">Créer un nouveau QCM</a>    
+{% endblock %}

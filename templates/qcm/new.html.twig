@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau QCM{% endblock %}
+
+{% block body %}
+    <h1>Créer un nouveau QCM</h1>
+
+    {{ include('qcm/_form.html.twig') }}
+
+    
+    <a href="{{ path('app_q_c_m_index') }}">Retour</a>
+{% endblock %}

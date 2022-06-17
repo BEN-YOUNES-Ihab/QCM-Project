@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Changer réponse{% endblock %}
+
+{% block body %}
+    <h1>Changer réponse</h1>
+
+    {{ include('answers/_form.html.twig', {'button_label': 'Sauvegarder'}) }}
+
+    <a href="{{ path('question-qcm', {'id': answer.getIdQuestion().getId()}) }}">Retour</a>
+
+    {{ include('answers/_delete_form.html.twig') }}
+{% endblock %}

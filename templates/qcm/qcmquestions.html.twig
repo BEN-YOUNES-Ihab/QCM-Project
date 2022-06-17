@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Questions{% endblock %}
+
+{% block body %}
+
+    <h1>{{ qcm.getTitle }}</h1>
+<ul>
+    <table class="table">
+        <thead>
+            <tr>
+                
+            </tr>
+        </thead>
+        <tbody>
+        {% set i = 1 %}
+        {% for question in questions %}
+            <tr>
+                <td>Q{{ i }}- {{ question.getLabel }}</a>
+                {% set i = i+1 %}
+                <br>
+                {% for answer in question.getAnswers() %}
+                    <a href="{{ path('app_answers_edit', {'id': answer.getId()}) }}">{{ answer.getLabel() }}</a>
+                    <br>
+               
+                {% endfor %}
+                </td>
+                <td>{{ question.getImage() }}</td>
+                
+                <td>
+                    <a href="{{ path('app_question_edit', {'id': question.id}) }}">Modifier question</a>
+                    <br>
+                    <a href="{{ path('app_answers_new', {'id': question.id}) }}">Ajouter une réponse</a>
+                    
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">Pas de questions</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_question_new') }}">Nouvelle question</a>
+{% endblock %}
