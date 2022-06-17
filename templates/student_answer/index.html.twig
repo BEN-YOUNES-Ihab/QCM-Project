@@ -19,8 +19,8 @@
                 <td>{{ student_answer.id }}</td>
                 <td>{{ student_answer.Result }}</td>
                 <td>
-                    <a href="{{ path('app_student_answer_show', {'id': student_answer.id}) }}">show</a>
-                    <a href="{{ path('app_student_answer_edit', {'id': student_answer.id}) }}">edit</a>
+                    <a href="{{ path('app_student_answer_show', {'id': student_answer.id}) }}">voir le groupe</a>
+                    <a href="{{ path('app_student_answer_edit', {'id': student_answer.id}) }}">modifier le groupe</a>
                 </td>
             </tr>
         {% else %}
@@ -31,5 +31,5 @@
         </tbody>
     </table>
 
-    <a href="{{ path('app_student_answer_new') }}">Create new</a>
+    <a href="{{ path('app_student_answer_new') }}">Créer un nouveau groupe</a>
 {% endblock %}

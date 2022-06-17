@@ -1,0 +1,711 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello QcmtestController!{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+</style>
+
+<head>
+
+  <!--  Meta  -->
+  <meta charset="UTF-8">
+  <title>Quiz hackathon 2</title>
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<style>
+	body { background-color: #ECECEC; }
+	</style>
+
+
+</head>
+
+<style>
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.question {
+  --correct-color: rgb(9, 187, 69);
+  --incorrect-color: rgb(245, 48, 48);
+  --selected-color: rgba(13, 110, 221, 0.712);
+  --disabled-color: rgb(219, 219, 219);
+  --disabled-correct-color: rgb(118, 212, 149);
+  --disabled-incorrect-color: rgb(221, 131, 131);
+
+  position: relative;
+  width: 500px;
+  height: 100%;
+  min-width: 500px;
+  min-height: max-content;
+  display: flex;
+  flex-direction: column;
+  padding: 1em;
+  border: 1px solid var(--selected-color);
+  border-radius: 10px;
+  font-family: consolas;
+}
+
+.question-text {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-transform: capitalize;
+}
+
+.answers {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 15px 20px;
+  margin-bottom: 20px;
+}
+
+.answer {
+  border: none;
+  font-size: 18px;
+  background: none;
+  padding: 10px 5px;
+  border: 1px solid rgba(13, 110, 221, 0.712);
+  outline: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.question.correct {
+  border-color: var(--correct-color);
+}
+.question.incorrect {
+  border-color: var(--incorrect-color);
+}
+
+.question.correct .answer.selected {
+  --selected-color: var(--correct-color);
+}
+.question.incorrect .answer.selected {
+  --selected-color: var(--incorrect-color);
+}
+
+.answer:hover {
+  background: rgba(13, 110, 221, 0.712);
+  color: white;
+  transition: all 200ms ease-out;
+}
+
+.answer.selected {
+  background: var(--selected-color);
+  border-color: var(--selected-color);
+  color: white;
+}
+
+.question.disabled .answer,
+.question.disabled .answer:hover {
+  background-color: var(--disabled-color);
+  border-color: var(--disabled-color);
+}
+.question.disabled.correct .answer.selected {
+  background-color: var(--disabled-correct-color);
+  border-color: var(--disabled-correct-color);
+}
+.question.disabled.incorrect .answer.selected {
+  background-color: var(--disabled-incorrect-color);
+  border-color: var(--disabled-incorrect-color);
+}
+
+.question-feedback {
+  color: black;
+  font-family: consolas, Cambria, sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  display: none;
+}
+
+.question.correct .question-feedback,
+.question.incorrect .question-feedback {
+  display: inline-block;
+}
+
+.question.correct .question-feedback {
+  color: var(--correct-color);
+}
+.question.incorrect .question-feedback {
+  color: var(--incorrect-color);
+}
+
+</style>
+
+<style>
+    
+#app-container {
+  position: absolute;
+  top: 180px;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  padding: 40px 20px;
+}
+
+#questions-container {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  grid-template-rows: repeat(3, max-content);
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+#score-container {
+  position: fixed;
+  right: 40px;
+  top: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  color: white;
+  background: rgb(13, 110, 221);
+  padding: 10px 15px;
+  min-width: 100px;
+  min-height: 45px;
+  border-radius: 10px;
+}
+
+#app-title {
+  margin-top: 0;
+  margin-bottom: 40px;
+  margin: 0 0 40px 20px;
+}
+
+</style>
+
+
+
+
+  <div id="app-container">
+    <div id="score-container">Score: 0</div>
+    <u><B><h1 id="app-title" Style ="color: purple" >HACKATHON QUIZ </h1></B></u>
+    <div id="questions-container"> 
+    </div>
+  </div>
+
+    <script>
+        var Question = function (questionObj) {
+        this.value = {
+        text: "Question",
+        answers: []
+        };
+    
+        this.selectedAnswer = null;
+        this.html = null;
+        this.questionText = null;
+        this.questionAnswers = null;
+        this.questionFeedback = null;
+    
+        this.value = Object.assign(this.value, questionObj);
+    
+        this.onQuestionAnswered = ({ detail }) => {
+        this.selectedAnswer = {
+            value: detail.answer,
+            html: detail.answerHtml
+        };
+        this.update();
+    
+        document.dispatchEvent(
+            new CustomEvent("question-answered", {
+            detail: {
+                question: this,
+                answer: detail.answer
+            }
+            })
+        );
+        };
+    
+        this.create = function () {
+        this.html = document.createElement("div");
+        this.html.classList.add("question");
+    
+        this.questionText = document.createElement("h2");
+        this.questionText.textContent = this.value.text;
+    
+        this.questionAnswers = document.createElement("div");
+        this.questionAnswers.classList.add("answers");
+    
+        for (let i = 0; i < this.value.answers.length; i++) {
+            const ansObj = this.value.answers[i];
+            let answer = createAnswer(ansObj);
+    
+            answer.onclick = (ev) => {
+            if (this.selectedAnswer !== null) {
+                this.selectedAnswer.html.classList.remove("selected");
+            }
+    
+            answer.classList.add("selected");
+    
+            this.html.dispatchEvent(
+                new CustomEvent("question-answered", {
+                detail: {
+                    answer: ansObj,
+                    answerHtml: answer
+                }
+                })
+            );
+            };
+    
+            this.questionAnswers.appendChild(answer);
+        }
+    
+        this.questionFeedback = document.createElement("div");
+        this.questionFeedback.classList.add("question-feedback");
+    
+        this.html.appendChild(this.questionText);
+        this.html.appendChild(this.questionAnswers);
+        this.html.appendChild(this.questionFeedback);
+    
+        this.html.addEventListener("question-answered", this.onQuestionAnswered);
+    
+        return this.html;
+        };
+    
+        this.disable = function () {
+        this.html.classList.add("disabled");
+        this.html.onclick = (ev) => {
+            ev.stopPropagation();
+        };
+    
+        this.html.removeEventListener("question-answered", this.onQuestionAnswered);
+    
+        let answers = this.html.querySelectorAll(".answer");
+        for (let i = 0; i < answers.length; i++) {
+            let answer = answers[i];
+            answer.onclick = null;
+        }
+        };
+    
+        this.remove = function () {
+        let children = this.html.querySelectorAll("*");
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i];
+            this.html.removeChild(child);
+        }
+    
+        this.html.removeEventListener("question-answered", this.onQuestionAnswered);
+    
+        this.html.parentNode.removeChild(this.html);
+        this.html = null;
+        };
+    
+        this.update = function () {
+        let correctFeedback, incorrectFeedback;
+        this.html = this.html || document.createElement("div");
+    
+        correctFeedback = "Nice! You got it right.";
+        incorrectFeedback = "Oh! Not the correct answer.";
+    
+        if (this.selectedAnswer !== null) {
+            if (this.selectedAnswer.value.isCorrect) {
+            this.html.classList.add("correct");
+            this.html.classList.remove("incorrect");
+            this.questionFeedback.innerHTML = correctFeedback;
+            } else {
+            this.html.classList.add("incorrect");
+            this.html.classList.remove("correct");
+            this.questionFeedback.innerHTML = incorrectFeedback;
+            }
+        }
+        };
+    
+        function createAnswer(obj) {
+        this.value = {
+            text: "Answer",
+            isCorrect: false
+        };
+    
+        this.value = Object.assign(this.value, obj);
+    
+        this.html = document.createElement("button");
+        this.html.classList.add("answer");
+    
+        this.html.textContent = this.value.text;
+    
+        return this.html;
+        }
+    }
+  
+  
+
+    let questionsData = [
+        {
+        text: "where are Estiam ?",
+        answers: [
+            {
+            text: "Saint Etienne",
+            isCorrect: false
+            },
+            {
+            text: "Lyon",
+            isCorrect: true
+            },
+            {
+            text: "Nice",
+            isCorrect: false
+            },
+            {
+            text: "Grenoble",
+            isCorrect: false
+            }
+        ]
+        },
+        {
+        text: "who are the hackthon examinator ?",
+        answers: [
+            {
+            text: "Malek",
+            isCorrect: true
+            },
+            {
+            text: "John",
+            isCorrect: false
+            },
+            {
+            text: "Willy",
+            isCorrect: false
+            },
+            {
+            text: "I Don't know",
+            isCorrect: false
+            }
+        ]
+        },
+        {
+        text: "What is Symfony ?",
+        answers: [
+            {
+            text: "an application",
+            isCorrect: false
+            },
+            {
+            text: 'a web Site"',
+            isCorrect: false
+            },
+            {
+            text: "A PHP Framwork",
+            isCorrect: true
+            }
+        ]
+        },
+        {
+        text: "In witch year was the first version of c++ released",
+        answers: [
+            {
+            text: "1982",
+            isCorrect: true
+            },
+            {
+            text: "1995",
+            isCorrect: false
+            },
+            {
+            text: "1983",
+            isCorrect: false
+            },
+            {
+            text: "1985",
+            isCorrect: false
+            }
+        ]
+        },
+        {
+        text: "What is France capital ?",
+        answers: [
+            {
+            text: "Lyon",
+            isCorrect: true
+            },
+            {
+            text: "Marseille",
+            isCorrect: false
+            },
+            {
+            text: "Paris",
+            isCorrect: true
+            },
+            {
+            text: "Lille",
+            isCorrect: false
+            }
+        ]
+        },
+        {
+        text: "How classroon has Estiam ?",
+        answers: 
+        [
+            {
+            text: "5 classroom",
+            isCorrect: true
+            },
+            {
+            text: "4 classroom",
+            isCorrect: false
+            },
+            {
+            text: "3 classroom",
+            isCorrect: false
+            },
+            {
+            text: "1 classroom",
+            isCorrect: false
+            }
+        ]
+        },
+        {
+        text: "choose into the follow answer the name of the most popular CMS !",
+        answers: [
+            {
+            text: "Prestashop",
+            isCorrect: false
+            },
+            {
+            text: "Wix",
+            isCorrect: false
+            },
+            {
+            text: "Wordpress",
+            isCorrect: true
+            },
+            {
+            text: "Symfony",
+            isCorrect: false
+            }
+        ]
+        },
+        {
+        text: "What is Spain capital ? // Quelle est la capital de l'Espagne ?",
+        answers: [
+            {
+            text: "Madrid",
+            isCorrect: true
+            },
+            {
+            text: "Monaco",
+            isCorrect: false
+            },
+            {
+            text: "Paris",
+            isCorrect: false
+            },
+            {
+            text: "Lille",
+            isCorrect: false
+            }
+        ]
+        },
+        {
+        text: "Who is the recent european Union president ? // Qui est l'actuel Président de l'union Européenne ?",
+        answers: [
+            {
+            text: "Charles Michel",
+            isCorrect: true
+            },
+            {
+            text: "Emmanuel Macron",
+            isCorrect: false
+            },
+            {
+            text: "tom will",
+            isCorrect: true
+            },
+            {
+            text: "Charlis Marvey",
+            isCorrect: false
+            }
+        ]
+        },
+        {
+        text: "combien de classes possede le campus de Estiam Lyon ?",
+        answers: [
+            {
+            text: "Lyon",
+            isCorrect: true
+            },
+            {
+            text: "Marseille",
+            isCorrect: false
+            },
+            {
+            text: "Paris",
+            isCorrect: true
+            },
+            {
+            text: "Lille",
+            isCorrect: false
+            }
+        ]
+        },
+        {
+        text: "How students has Estiam E2 of Lyon ?",
+        answers: [
+            {
+            text: "11",
+            isCorrect: true
+            },
+            {
+            text: "10",
+            isCorrect: false
+            },
+            {
+            text: "13",
+            isCorrect: false
+            },
+            {
+            text: "18",
+            isCorrect: false
+            }
+        ]
+        },
+        {
+        text: "Pourquoi Etudier à l'Estiam ?",
+        answers: [
+            {
+            text: "Formation de qualité et de haut niveau",
+            isCorrect: true
+            },
+            {
+            text: "école d'ingénieur",
+            isCorrect: false
+            },
+            {
+            text: "école public",
+            isCorrect: false
+            },
+            {
+            text: "école bilingue",
+            isCorrect: false
+            }
+        ]
+        }
+    ];
+    
+    // variables initialization
+    let questions = [];
+    let score = 0,
+        answeredQuestions = 0;
+    let appContainer = document.getElementById("questions-container");
+    let scoreContainer = document.getElementById("score-container");
+    scoreContainer.innerHTML = `Score: ${score}/${questionsData.length}`;
+    
+    /**
+    * Shuffles array in place. ES6 version
+    * @param {Array} arr items An array containing the items.
+    */
+    function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+    }
+    
+    shuffle(questionsData);
+    
+    // creating questions
+    for (var i = 0; i < questionsData.length; i++) {
+        let question = new Question({
+        text: questionsData[i].text,
+        answers: questionsData[i].answers
+        });
+    
+        appContainer.appendChild(question.create());
+        questions.push(question);
+    }
+    
+    document.addEventListener("question-answered", ({ detail }) => {
+        if (detail.answer.isCorrect) {
+        score++;
+        }
+    
+        answeredQuestions++;
+        scoreContainer.innerHTML = `Score: ${score}/${questions.length}`;
+        detail.question.disable();
+    
+        if (answeredQuestions == questions.length) {
+        setTimeout(function () {
+            alert(`Quiz completed! \nFinal score: ${score}/${questions.length}`);
+        }, 100);
+        }
+    });
+    
+    console.log(questions, questionsData);
+    </script>
+
+    <script language='JavaScript'>
+		ss=0;
+		s=00;
+		m='0'+0;
+		h='0'+0;
+		j=0;
+		temps = h + ':'  + m + ':' + s
+		window.status = "Chrono " +h + ' : '  + m + ' : ' + s ;
+		function Chrono() {
+			if (m==0) {m='00'}
+			if(h==0) {h='00'}
+			if (ss<10){ss='0'+ss;}
+			if (s<10){s='0'+s;}
+			window.status = "Chrono " +h + ' : '  + m + ' : ' + s ;
+			document.formu.heure.value =h + ' : ' + m + ' : ' + s ;
+			document.formu.duree.value =h + ':' + m + ':' + s ;
+			s++;
+			ss++;
+			if (h==24){h='0'+0;j++;}
+			if (s==60){s=0;s=0; m++;if(m<10){m='0'+m;}}
+			if (m==60){m='0'+0;h++;if(h<10){h='0'+h;}}
+			chrono=window.setTimeout("Chrono();",1000);
+		}
+		</script>
+		<script>
+		function afficher()
+		{
+			document.getElementById("start").style.visibility = "hidden";
+			document.getElementById("pause").style.visibility = "visible";
+		}
+		function cacher()
+		{
+			document.getElementById("start").style.visibility = "visible";
+			document.getElementById("pause").style.visibility = "hidden";
+		}
+		</script>
+		<br>
+		<form action="traitement/ajout.php" method="post" name="formu" id="formu">
+			<div class="container d-flex justify-content-center">
+				<div class="col-6 shadow p-3 mb-5 bg-white rounded">
+				<h4 class="text-center">Chronomètre de Questionnaire</h4>
+				<h6 class="text-center">Estiam E2</h6>
+				<hr>
+				<input style="font-size:2em" class="form-control text-center font-weight-bold" type="text" id="heure" value="00 : 00 : 00" readonly>
+				<input type='hidden' name='duree'>
+				<input type='hidden' name='type' value='a'>
+				<br>
+				<div class="d-flex justify-content-center">
+					<div class="col-12 d-flex justify-content-around">
+						<div class="col">
+							<input class="btn btn-success btn-block" type="button" name="Submit" value="Lancer" id="start" onClick="Chrono(); afficher();">
+						</div>
+						
+						<div class="col">
+							<input class="btn btn-danger btn-block" type="button" name="Submit3" value="Réinitialiser"onClick="if (confirm('Souhaitez vous mettre le compteur à zéro?')){s=0;m=0;j=0;h=0;ss=0; window.status = 'Chrono 00 : 00 : 00' ; document.formu.heure.value ='00 : 00 : 00';}">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+</body>
+
+
+
+{% endblock %}

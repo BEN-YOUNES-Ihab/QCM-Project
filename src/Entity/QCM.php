@@ -25,7 +25,10 @@ class QCM
     private $Time;
 
     #[ORM\OneToMany(mappedBy: 'id_QCM', targetEntity: Question::class)]
+    
     private $questions;
+
+
 
     public function __construct()
     {
