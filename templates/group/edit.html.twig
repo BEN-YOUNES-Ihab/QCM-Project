@@ -3,11 +3,24 @@
 {% block title %}Edit Group{% endblock %}
 
 {% block body %}
-    <h1>Edit Group</h1>
+    <h1>Modifier le groupe</h1>
 
     {{ include('group/_form.html.twig', {'button_label': 'Update'}) }}
 
-    <a href="{{ path('app_group_index') }}">back to list</a>
+    <a href="{{ path('app_group_index') }}">Retournez a la liste des groupes</a>
 
     {{ include('group/_delete_form.html.twig') }}
+    <style>
+    p.credit {
+       
+       text-align:center;
+        position: absolute;
+        bottom: 10%;
+        right: 20%;
+    }
+    </style>
+			<p class="credit">
+				&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; Lelievre Thomas &emsp; - &emsp; Loic Kameni&emsp; - &emsp;
+				Yannick Jeefre KENANG &emsp; - &emsp; Emmanuel Gaëtan  &emsp; - &emsp; Belforte Théotime &emsp; - &emsp; Ihab Ben Younes
+			</p>
 {% endblock %}
