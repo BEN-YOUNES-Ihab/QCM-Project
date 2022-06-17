@@ -15,6 +15,7 @@ use App\Repository\QuestionRepository;
 #[Route('/qcm')]
 class QCMController extends AbstractController
 {
+    /* Page home */
     #[Route('/', name: 'app_q_c_m_index', methods: ['GET'])]
     public function index(QCMRepository $qCMRepository): Response
     {
@@ -79,7 +80,7 @@ class QCMController extends AbstractController
 
         return $this->redirectToRoute('app_q_c_m_index', [], Response::HTTP_SEE_OTHER);
     }
-
+    /* Page question */
     #[Route('/{id}/questions', name: 'question-qcm', methods: ['GET'])]
     public function questions(QCM $qcm): Response
     {
@@ -100,7 +101,7 @@ class QCMController extends AbstractController
             ]);
     }
     
-    
+    /* Page new question */
     #[Route('/newquestion', name: 'newQuestion', methods: ['GET', 'POST'])]
     public function newquestion(Request $request, QuestionRepository $questionRepository): Response
     {
